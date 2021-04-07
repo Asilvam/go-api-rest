@@ -12,7 +12,11 @@ import (
 func GetConnection() *sql.DB {
 	loadENV()
 	user := os.Getenv("DBUSER")
-	connStr := "postgres://" + user + ":hirefront@localhost:5432/hirefront?sslmode=disable"
+	pass := os.Getenv("DBPASS")
+	host := os.Getenv("DBHOST")
+	port := os.Getenv("DBPORT")
+	dbname := os.Getenv("DBMAIN_DB")
+	connStr := "postgres://" + user + ":" + pass + "@" + host + ":" + port + "/" + dbname + "?sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
