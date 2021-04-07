@@ -10,7 +10,6 @@ import (
 
 func main() {
 	var port string = "8080"
-	//controllers.Get2Excel()
 	router := mux.NewRouter()
 	apiRouter := router.PathPrefix("/api/").Subrouter()
 	apiRouter.HandleFunc("/todos", controllers.GetTodos).Methods("GET")
