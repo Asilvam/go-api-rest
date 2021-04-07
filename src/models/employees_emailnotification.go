@@ -1,9 +1,11 @@
 package models
 
 import (
+	"fmt"
 	"go-api-rest/src/db"
 	"log"
 
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"gopkg.in/guregu/null.v3"
 )
 
@@ -22,7 +24,7 @@ type Employees_emailnotification struct {
 
 func Get(ID string) (Employees_emailnotification, bool) {
 	db := db.GetConnection()
-	row := db.QueryRow("SELECT * FROM employees_emailnotification WHERE id = $1", ID)
+	row := db.QueryRow("SELECT * FROM employees_emailnotification_2 WHERE id = $1", ID)
 
 	var id int
 	var task_id string
@@ -65,7 +67,7 @@ func Get(ID string) (Employees_emailnotification, bool) {
 
 func GetAll() []Employees_emailnotification {
 	db := db.GetConnection()
-	rows, err := db.Query("SELECT * FROM employees_emailnotification ORDER BY id")
+	rows, err := db.Query("SELECT * FROM employees_emailnotification_2 ORDER BY id")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,6 +122,47 @@ func GetAll() []Employees_emailnotification {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// Test Excel carga
+	Get2Excel(todos)
 	return todos
+}
+
+func Get2Excel(data []Employees_emailnotification) {
+	f := excelize.NewFile()
+
+	sheet1Name := "Hoja 1"
+	f.SetSheetName(f.GetSheetName(1), sheet1Name)
+
+	f.SetCellValue(sheet1Name, "A1", "id")
+	f.SetCellValue(sheet1Name, "b1", "task_id")
+	f.SetCellValue(sheet1Name, "c1", "status")
+	f.SetCellValue(sheet1Name, "d1", "notification_type")
+	f.SetCellValue(sheet1Name, "e1", "moment")
+	f.SetCellValue(sheet1Name, "f1", "employees")
+	f.SetCellValue(sheet1Name, "g1", "created")
+	f.SetCellValue(sheet1Name, "h1", "updated")
+	f.SetCellValue(sheet1Name, "i1", "from_employee_id")
+	f.SetCellValue(sheet1Name, "j1", "to_employee_id")
+
+	err := f.AutoFilter(sheet1Name, "A1", "J1", "")
+	if err != nil {
+		log.Fatal("ERROR", err.Error())
+	}
+
+	for i, each := range data {
+		f.SetCellValue(sheet1Name, fmt.Sprintf("A%d", i+2), each.Id)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("B%d", i+2), each.Task_id)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("C%d", i+2), each.Status)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("D%d", i+2), each.Notification_type)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("E%d", i+2), each.Moment)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("F%d", i+2), each.Employees)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("G%d", i+2), each.Created)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("H%d", i+2), each.Updated)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("I%d", i+2), each.From_employee_id)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("J%d", i+2), each.To_employee_id)
+	}
+
+	if err := f.SaveAs("test_employees_emailnotification.xlsx"); err != nil {
+		println(err.Error())
+	}
 }

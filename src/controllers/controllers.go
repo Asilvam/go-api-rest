@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
+
 	"go-api-rest/src/models"
+
 	"net/http"
 
 	"github.com/gorilla/mux"
